@@ -75,10 +75,10 @@ export class ContactRepository {
     });
   }
 
-  delete(id){
+  delete(id): Promise<void>{
     return new Promise((resolve) => {
       ContactsBD = ContactsBD.filter((contact) => contact.id !== id)
-      resolve('resolved')
+      resolve()
     });
   }
 }
