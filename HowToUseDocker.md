@@ -42,7 +42,7 @@ docker rmi postgres
 vamos dizer que queremos executar nosso container de forma interativa usando o bash terminal
 docker exec -it pg bash
 
-## Locando no banco de dados
+## Logando no banco de dados
 psql -U nome_do_usuario_declarado_na_variavel_de_ambiente.
 psql -U root
 
@@ -65,3 +65,10 @@ CTRL+L = LIMPAR TERMINAL
 intalar o pg para fazer a conexão
 conexão do postgres com o node.
 npm install pg
+
+## Iniciar uso após toda configuração feita.
+Inicie o docker no computador
+agora é no terminal do vscode
+docker start nome_do_container → EX.: docker start pg
+docker exec -it pg bash → iniciando o container no terminal
+psql -U root → Logando no banco

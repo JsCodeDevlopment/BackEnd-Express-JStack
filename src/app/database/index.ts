@@ -10,13 +10,11 @@ const client = new Client({
 
 client.connect();
 
-export const query = async (query) => {
+export const query = async (query, values?) => {
   try {
-    const { rows } = await client.query(query);
+    const { rows } = await client.query(query, values);
     return rows;
   } catch (error) {
     console.error(error, "Erro ao executar essa query.");
   }
 };
-
-query("SELECT * FROM contacts").then(console.log);

@@ -1,25 +1,29 @@
+import { Request, Response } from "express";
 import { IMock } from "../../interfaces/IMockUsers";
 import { ContactRepository } from "../repositories/ContactsRepository";
 
 const repositoryContacts = new ContactRepository();
 
 export class ContactController {
-  async index(req, res) {
+  async index(req: Request, res: Response): Promise<IMock[] | undefined> {
     try {
-      const contacts = await repositoryContacts.findAll();
+      const { orderBy } = req.query as { orderBy: string }
+      const contacts = await repositoryContacts.findAll(orderBy);
       res.json(contacts);
     } catch (error) {
       console.error(error, "Erro ao buscar os contatos");
+      return undefined
     }
   }
 
-  async show(req, res) {
+  async show(req: Request, res: Response): Promise<IMock | undefined> {
     try {
       const { id } = req.params;
       const contact = await repositoryContacts.findById(id);
 
       if (!contact) {
-        return res.status(404).json({ error: "sem usuário" });
+        res.status(404).json({ error: "sem usuário" });
+        return 
       }
 
       res.json(contact);
@@ -28,7 +32,7 @@ export class ContactController {
     }
   }
 
-  async store(req, res) {
+  async store(req: Request, res: Response) {
     try{
       const { name, email, phone, category_id } = req.body as IMock
 
@@ -50,7 +54,7 @@ export class ContactController {
     }
   }
 
-  async update(req, res) {
+  async update(req: Request, res: Response) {
     try {
       const { id } = req.params
       const { name, email, phone, category_id } = req.body as IMock
@@ -65,7 +69,7 @@ export class ContactController {
         res.status(400).json({error: 'Nome ausente, esse campo é obrigatório.'});
       }
 
-      const contactEmailExists = await repositoryContacts.findByEmail(email) as IMock
+      const contactEmailExists = await repositoryContacts.findByEmail(email)
 
       if (contactEmailExists && contactEmailExists.id !== id){
         return res.status(400).json({ error: 'Esse email já está em uso.' })
@@ -79,7 +83,7 @@ export class ContactController {
     }
   }
 
-  async delete(req, res) {
+  async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const contact = await repositoryContacts.findById(id);
@@ -93,6 +97,7 @@ export class ContactController {
 
       res.sendStatus(204)
     } catch (error) {
+      res.sendStatus(500)
       console.error(error, "Erro ao deletar contato");
     }
   }

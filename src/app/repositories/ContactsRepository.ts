@@ -1,84 +1,76 @@
 import { IMock } from "../../interfaces/IMockUsers";
-import { v4 } from "uuid";
-
-let ContactsBD: IMock[] = [
-  {
-    id: v4(),
-    name: "ziriguidum",
-    email: "ziri@guidum.com",
-    phone: "7894568852",
-    category_id: v4(),
-  },
-  {
-    id: v4(),
-    name: "tontoinho",
-    email: "totoim@mail.com",
-    phone: "7894568852",
-    category_id: v4(),
-  },
-  {
-    id: v4(),
-    name: "cabeça di gelo",
-    email: "cabeca@mail.com",
-    phone: "7894568852",
-    category_id: v4(),
-  },
-];
+import { query } from '../database'
 
 export class ContactRepository {
-  findAll(): Promise<IMock[]> {
-    return new Promise((resolve, reject) => {
-      resolve(ContactsBD);
-    });
+  async findAll(orderBy = 'ASC'){
+    const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    const rows = await query(`
+    SELECT * FROM contacts
+    ORDER BY name ${direction}
+    `)
+    return rows
   }
 
-  findById(id){
-    return new Promise((resolve) => {
-      resolve(ContactsBD.find((contact) => contact.id === id))
-    });
+  async findById(id: string){
+    const result = await query(`
+    SELECT * FROM contacts WHERE id = $1
+    `, [id])
+
+    if(result && result.length > 0){
+      const [row] = result
+      return row
+    } else {
+      return undefined
+    }
   }
 
-  findByEmail(email){
-    return new Promise((resolve) => {
-      resolve(ContactsBD.find((contact) => contact.email === email))
-    });
+  async findByEmail(email: string){
+    const result = await query(`
+    SELECT * FROM contacts WHERE email = $1
+    `, [email])
+    
+    if(result && result.length > 0){
+      const [row] = result
+      return row
+    } else {
+      return undefined
+    }
   }
 
-  create({ name, email, phone, category_id }: Omit<IMock, "id">){
-    return new Promise((resolve) => {
-      const newContact = {
-        id: v4(),
-        name,
-        email,
-        phone, 
-        category_id
-      }
-      ContactsBD.push(newContact)
+  async create({ name, email, phone, category_id }: Omit<IMock, "id">){
+    const result = await query(`
+    INSERT INTO contacts(name, email, phone, category_id)
+    VALUES($1, $2, $3, $4)
+    RETURNING *
+    `, [name, email, phone, category_id])
 
-      resolve(newContact)
-    });
+    if (result && result.length > 0) {
+      const [row] = result
+      return row
+    } else {
+      return undefined
+    }
   }
 
-  update(id, { name, email, phone, category_id }: Omit<IMock, "id">){
-    return new Promise((resolve) => {
-      const updateContact = {
-        id,
-        name,
-        email,
-        phone, 
-        category_id
-      }
-      ContactsBD = ContactsBD.map((contact) => (
-        contact.id === id ? updateContact : contact
-      ))
-      resolve(updateContact)
-    });
+  async update(id: string, { name, email, phone, category_id }: Omit<IMock, "id">){
+    const result = await query(`
+    UPDATE contacts
+    SET name = $2, email = $3, phone = $4, category_id = $5
+    WHERE id = $1
+    RETURNING *
+    `, [id, name, email, phone, category_id])
+
+    if (result && result.length > 0) {
+      const [row] = result
+      return row
+    } else {
+      return undefined
+    }
   }
 
-  delete(id): Promise<void>{
-    return new Promise((resolve) => {
-      ContactsBD = ContactsBD.filter((contact) => contact.id !== id)
-      resolve()
-    });
+  async delete(id: string): Promise<void>{
+    await query(`
+    DELETE FROM contacts WHERE id = $1
+    `, [id])
   }
 }
