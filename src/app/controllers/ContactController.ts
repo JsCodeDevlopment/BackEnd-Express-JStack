@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { IMock } from "../../interfaces/IMockUsers";
+import { IUser } from "../../interfaces/IUser";
 import { ContactRepository } from "../repositories/ContactsRepository";
 
 const repositoryContacts = new ContactRepository();
 
 export class ContactController {
-  async index(req: Request, res: Response): Promise<IMock[] | undefined> {
+  async index(req: Request, res: Response): Promise<IUser[] | undefined> {
     try {
       const { orderBy } = req.query as { orderBy: string }
       const contacts = await repositoryContacts.findAll(orderBy);
@@ -16,7 +16,7 @@ export class ContactController {
     }
   }
 
-  async show(req: Request, res: Response): Promise<IMock | undefined> {
+  async show(req: Request, res: Response): Promise<IUser | undefined> {
     try {
       const { id } = req.params;
       const contact = await repositoryContacts.findById(id);
@@ -32,9 +32,9 @@ export class ContactController {
     }
   }
 
-  async store(req: Request, res: Response) {
+  async store(req: Request, res: Response): Promise<IUser | undefined> {
     try{
-      const { name, email, phone, category_id } = req.body as IMock
+      const { name, email, phone, category_id } = req.body as IUser
 
       if (!name) {
         res.status(400).json({error: 'Nome ausente, esse campo é obrigatório.'});
@@ -42,7 +42,8 @@ export class ContactController {
 
       const contactExists = await repositoryContacts.findByEmail(email)
       if (contactExists) {
-        return res.status(400).json({error: 'O contato que você está tentando cadastrar já existe.'})
+        res.status(400).json({error: 'O contato que você está tentando cadastrar já existe.'})
+        return 
       }
       const contact = await repositoryContacts.create({
         name, email, phone, category_id
@@ -54,10 +55,10 @@ export class ContactController {
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(req: Request, res: Response): Promise<IUser | undefined> {
     try {
       const { id } = req.params
-      const { name, email, phone, category_id } = req.body as IMock
+      const { name, email, phone, category_id } = req.body as IUser
 
       const contactExists = await repositoryContacts.findById(id)
       
@@ -72,10 +73,11 @@ export class ContactController {
       const contactEmailExists = await repositoryContacts.findByEmail(email)
 
       if (contactEmailExists && contactEmailExists.id !== id){
-        return res.status(400).json({ error: 'Esse email já está em uso.' })
+        res.status(400).json({ error: 'Esse email já está em uso.' })
+        return 
       }
       
-      const contact = await repositoryContacts.update(id, { name, email, phone, category_id } as IMock)
+      const contact = await repositoryContacts.update(id, { name, email, phone, category_id } as IUser)
 
       res.json(contact)
     } catch (error) {

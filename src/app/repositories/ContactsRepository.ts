@@ -1,4 +1,4 @@
-import { IMock } from "../../interfaces/IMockUsers";
+import { IUser } from "../../interfaces/IUser";
 import { query } from '../database'
 
 export class ContactRepository {
@@ -12,7 +12,7 @@ export class ContactRepository {
   }
 
   async findById(id: string){
-    const result = await query(`
+    const result = await query<IUser[]>(`
     SELECT * FROM contacts WHERE id = $1
     `, [id])
 
@@ -24,11 +24,10 @@ export class ContactRepository {
     }
   }
 
-  async findByEmail(email: string){
-    const result = await query(`
+  async findByEmail(email: string): Promise<IUser | undefined> {
+    const result = await query<IUser[]>(`
     SELECT * FROM contacts WHERE email = $1
     `, [email])
-    
     if(result && result.length > 0){
       const [row] = result
       return row
@@ -37,8 +36,8 @@ export class ContactRepository {
     }
   }
 
-  async create({ name, email, phone, category_id }: Omit<IMock, "id">){
-    const result = await query(`
+  async create({ name, email, phone, category_id }: Omit<IUser, "id">){
+    const result = await query<IUser[]>(`
     INSERT INTO contacts(name, email, phone, category_id)
     VALUES($1, $2, $3, $4)
     RETURNING *
@@ -52,8 +51,8 @@ export class ContactRepository {
     }
   }
 
-  async update(id: string, { name, email, phone, category_id }: Omit<IMock, "id">){
-    const result = await query(`
+  async update(id: string, { name, email, phone, category_id }: Omit<IUser, "id">){
+    const result = await query<IUser[]>(`
     UPDATE contacts
     SET name = $2, email = $3, phone = $4, category_id = $5
     WHERE id = $1
