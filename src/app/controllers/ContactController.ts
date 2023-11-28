@@ -91,10 +91,9 @@ export class ContactController {
       const contact = await repositoryContacts.findById(id);
 
       if (!contact) {
-        return res
-          .status(404)
-          .json({ error: "Usuário que você está tentando excluir não exite." });
+        return res.status(404).json({ error: "Usuário que você está tentando excluir não exite." });
       }
+      
       await repositoryContacts.delete(id);
 
       res.sendStatus(204)

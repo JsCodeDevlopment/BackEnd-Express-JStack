@@ -14,4 +14,7 @@ router.post("/contacts", controllerContact.store);
 router.put("/contacts/:id", controllerContact.update);
 
 router.get("/categories", controllerCategory.index);
+router.get("/categories/:id", controllerCategory.show);
+router.delete("/categories/:id", controllerCategory.delete);
 router.post("/categories", controllerCategory.store);
+router.put("/categories/:id", controllerCategory.update);
